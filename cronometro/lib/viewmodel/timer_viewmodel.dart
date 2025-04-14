@@ -8,6 +8,7 @@ class TimerViewmodel extends ChangeNotifier {
   final TimerModel _timerModel = TimerModel();
   bool _isRunning = false;
   Timer? _timer;
+  Timer? _syncTimer;
   static const platform = MethodChannel('com.example.cronometro/background');
 
   int get seconds => _timerModel.seconds;
@@ -17,6 +18,9 @@ class TimerViewmodel extends ChangeNotifier {
 
   TimerViewmodel() {
     _syncWithNative();
+    _syncTimer = Timer.periodic(const Duration(seconds: 1), (timer) {
+      _syncWithNative();
+    });
   }
 
   Future<void> _syncWithNative() async {
@@ -68,7 +72,9 @@ class TimerViewmodel extends ChangeNotifier {
     _isRunning = false;
     try {
       await platform.invokeMethod('stopTimer');
-      print("Timer parado com sucesso no nativo");
+      if (kDebugMode) {
+        print("Timer parado com sucesso no nativo");
+      }
     } on PlatformException catch (e) {
       if (kDebugMode) {
         print("Erro ao parar o timer nativo: ${e.message}");
@@ -101,6 +107,7 @@ class TimerViewmodel extends ChangeNotifier {
   @override
   void dispose() {
     _timer?.cancel();
+    _syncTimer?.cancel();
     super.dispose();
   }
 }
