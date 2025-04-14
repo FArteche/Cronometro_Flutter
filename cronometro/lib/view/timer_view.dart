@@ -4,6 +4,7 @@ import 'package:cronometro/widgets/botoes.dart';
 import 'package:cronometro/widgets/card_volta.dart';
 import 'package:cronometro/widgets/circulo_progresso.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 import 'package:provider/provider.dart';
 
 class TimerView extends StatelessWidget {
@@ -34,25 +35,34 @@ class TimerView extends StatelessWidget {
         ),
         body: Center(
           child: Consumer<TimerViewmodel>(builder: (context, tempo, child) {
-            print("Consumer rebuild: isRunning = ${tempo.isRunning}, seconds = ${tempo.seconds}");
+            print(
+                "Consumer rebuild: isRunning = ${tempo.isRunning}, segundos = ${tempo.seconds}");
             return Column(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                //Contador
-                Padding(
-                  padding: const EdgeInsets.all(20.0),
-                  child: Stack(
-                    alignment: Alignment.center,
-                    children: [
-                      ProgressCircle(progresso: tempo.progresso),
-                      Text(
-                        _formatarTempo(tempo.seconds),
-                        style: const TextStyle(fontSize: 48),
-                      ),
-                    ],
+                Semantics(
+                  label: tempo.progresso == 0.0
+                      ? "Cronômetro zerado"
+                      : "Cronômetro em andamento",
+                  hint: tempo.progresso == 0.0
+                      ? "Cronômetro zerado"
+                      : "Tempo decorrido ${_formatarTempo(tempo.seconds)}",
+                  child:
+                      //Contador
+                      Padding(
+                    padding: const EdgeInsets.all(20.0),
+                    child: Stack(
+                      alignment: Alignment.center,
+                      children: [
+                        ProgressCircle(progresso: tempo.progresso),
+                        Text(
+                          _formatarTempo(tempo.seconds),
+                          style: const TextStyle(fontSize: 48),
+                        ),
+                      ],
+                    ),
                   ),
                 ),
-
                 const SizedBox(height: 20),
                 Column(
                   //Botões de controle
@@ -65,9 +75,10 @@ class TimerView extends StatelessWidget {
                         BotaoIconeTexto(
                           icon: Icons.play_arrow,
                           text: 'Iniciar',
-                          onPressed: tempo.isRunning
-                              ? null
-                              : () => tempo.startTimer(),
+                          onPressed:
+                              tempo.isRunning ? null : () => tempo.startTimer(),
+                          semanticsLabel: 'Botão Iniciar',
+                          semanticsHint: 'Inicia o cronômetro',
                         ),
                         //Botão para adicionar volta
                         const SizedBox(width: 10),
@@ -76,6 +87,8 @@ class TimerView extends StatelessWidget {
                           text: 'Volta',
                           onPressed:
                               tempo.isRunning ? () => tempo.addVolta() : null,
+                          semanticsLabel: 'Botão de Volta',
+                          semanticsHint: 'Contabiliza a volta e o tempo dela',
                         ),
                         const SizedBox(height: 10),
                       ],
@@ -92,6 +105,8 @@ class TimerView extends StatelessWidget {
                           text: 'Pausar',
                           onPressed:
                               tempo.isRunning ? () => tempo.stopTimer() : null,
+                          semanticsLabel: 'Botão Pausar',
+                          semanticsHint: 'Pausa o cronômetro',
                         ),
                         //Botão para resetar o cronômetro
                         const SizedBox(width: 10),
@@ -103,6 +118,8 @@ class TimerView extends StatelessWidget {
                                   ? null
                                   : () => tempo.resetTimer()
                               : null,
+                          semanticsLabel: 'Botão Resetar',
+                          semanticsHint: 'Zera o cronômetro e as voltas',
                         ),
                       ],
                     ),
@@ -123,6 +140,9 @@ class TimerView extends StatelessWidget {
                             numeroVolta: index + 1,
                             tempoVolta: _formatarTempo(tempoVoltaIsolado),
                             tempoTotal: _formatarTempo(tempoVolta),
+                            semanticsLabel: 'Volta ${index + 1}',
+                            semanticsHint:
+                                'Volta ${index + 1}, tempo de volta $tempoVoltaIsolado, tempo total $tempoVolta',
                           );
                         },
                       ),
