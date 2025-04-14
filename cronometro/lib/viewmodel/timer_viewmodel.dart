@@ -100,6 +100,17 @@ class TimerViewmodel extends ChangeNotifier {
   void addVolta() {
     if (_isRunning) {
       _timerModel.addVolta(_timerModel.seconds);
+
+      try {
+        platform.invokeMethod('addLap', {
+          'lapNumber': _timerModel.voltas.length,
+          'lapTime': _timerModel.seconds
+        });
+      } on PlatformException catch (e) {
+        if (kDebugMode) {
+          print("Erro ao enviar notificação de volta: ${e.message}");
+        }
+      }
       notifyListeners();
     }
   }
